@@ -15,10 +15,7 @@ DBSCALE = 20
 MEDAVGTIME = 0.3 # seconds
 RATIOOFMAX = 0.7 # ratio of dB loss before trimming
 CONVOLVEN = 2500 # convolve strength - 10000+ is too high!
-PLOTFREQ = False
 
-xlbook = xlwt.Workbook(encoding='utl-8')
-xlsheet = xlbook.add_sheet('results')
 
 def calcRT60(filename):
     RT60raw = [0.0] * len(freqthird)
@@ -35,7 +32,7 @@ def calcRT60(filename):
     da = da[startframe:endframe] # trim file to length
 
     for k in range(len(freqthird)):
-        daf = np.fft.rfft(da) # fourier transform
+        daf = np.fft.rfft(da, n=len(da)) # fourier transform
         lofreq = round((freqbands[k + 0] / (par[2] / 2)) * (len(daf) - 1))
         hifreq = round((freqbands[k + 1] / (par[2] / 2)) * (len(daf) - 1))
         daf[:lofreq] = 0 # apply high pass
@@ -73,50 +70,20 @@ def calcRT60(filename):
         RT60raw[k] = RT60
         print('|', end='')
 
-        if PLOTFREQ: # plot only if user sets PLOTFREQ to true
-            plt.figure(1)
-            plt.subplot(211)
-            plt.suptitle('Linear Regression: ' + str(freqthird[k]) + ' Hz')
-            plt.plot(ndapre[0:ndalog_cut_ind], 'b')
-            plt.plot(dBlossline, 'g-')
-            plt.subplot(212)        
-            plt.plot(ndalog, 'b:')
-            plt.plot(dBlossline, 'g-')
-            plt.show()
+
+        # plt.figure(1)
+        # plt.subplot(211)
+        # plt.suptitle('Linear Regression: ' + str(freqthird[k]) + ' Hz')
+        # plt.plot(ndapre[0:ndalog_cut_ind], 'b')
+        # plt.plot(dBlossline, 'g-')
+        # plt.subplot(212)
+        # plt.plot(ndalog, 'b:')
+        # plt.plot(dBlossline, 'g-')
+        # plt.savefig(f'{filename}.png')
+        plt.plot(RT60raw)
+        plt.savefig(f'{filename}.png')
 
     print('')
     return RT60raw
 
-dirlist = glob.glob('*/')
-print(len(dirlist), 'folders')
-if len(dirlist) > 0:
-    print('\n-----\n')
-for dirs in range(len(dirlist)):
-    wavlist = glob.glob(dirlist[dirs] + '*.wav')
-    print('*(', dirs + 1, 'of', len(dirlist), ')', dirlist[dirs], '-', len(wavlist), 'files')
-    RT60arr = [0.0] * len(freqthird)
-    RT60fin = [[0.0 for i in range(len(wavlist))] for j in range(len(freqthird))]
-    RT60err = [0.0] * len(freqthird)
-
-    for wav in range(len(wavlist)):
-        print('(', wav + 1, 'of', len(wavlist), ')', wavlist[wav])
-        RT60arr = calcRT60(wavlist[wav])
-        for m in range(len(RT60arr)):
-            RT60fin[m][wav] = RT60arr[m]
-            
-    if len(wavlist) == 0:
-        print('No files.')
-    else:
-        xlsheet.write(0, 2 * dirs + 0, dirlist[dirs])
-        xlsheet.write(0, 2 * dirs + 1, 'stdev')
-        print('')
-        for i in range(len(RT60fin)):
-            RT60arr[i] = np.median(RT60fin[i])
-            RT60err[i] = np.std(RT60fin[i])
-            xlsheet.write(i + 1, 2 * dirs + 0, RT60arr[i])
-            xlsheet.write(i + 1, 2 * dirs + 1, RT60err[i])
-        for i in range(len(RT60arr)):
-            print(format(RT60arr[i], '.5f'))
-        print('\n-----\n')
-xlbook.save('RT60.xls')
-print('FINISHED')
+calcRT60("C:\\Users\\Valerio\\PycharmProjects\\Sound-Modelling\\test_sound_files\\clap.wav")

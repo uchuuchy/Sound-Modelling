@@ -14,7 +14,7 @@ def get_input():
 
 
 def main():
-    stream = get_input()
+    stream = str(get_input())
     print(stream)
     stream = CleanUp(stream).convert()
     WaveManip(stream).wavePlot()
