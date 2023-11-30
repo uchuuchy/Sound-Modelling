@@ -1,5 +1,5 @@
-from CleanUp import CleanUp
-from WaveManip import WaveManip
+from modules.CleanUp import CleanUp
+from modules.WaveManip import WaveManip
 
 
 def get_input():
